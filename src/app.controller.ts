@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, DefaultValuePipe, Get, HttpCode, Param, ParseIntPipe, Patch, Post, Query, UploadedFiles, UseInterceptors, UsePipes, ValidationPipe } from '@nestjs/common';
+import { BadRequestException, Body, Controller, DefaultValuePipe, Delete, Get, HttpCode, Param, ParseIntPipe, Patch, Post, Query, UploadedFiles, UseInterceptors, UsePipes, ValidationPipe } from '@nestjs/common';
 import { AppService } from './app.service';
 import { CreateDto } from './dto/create.dto';
 import { FilesInterceptor } from '@nestjs/platform-express';
@@ -62,8 +62,8 @@ export class AppController {
   }
 
   @Get(':id')
-  getProduct(@Param('id', ParseIntPipe) id: number) {
-    return this.appService.getProduct(id);
+  async getProduct(@Param('id', ParseIntPipe) id: number) {
+    return await this.appService.getProduct(id);
   }
   
   @UsePipes(new ValidationPipe())
@@ -73,19 +73,22 @@ export class AppController {
     return res;
   }
 
-  @Patch(':id/picture')
-  @HttpCode(200)
+  @Delete(':id')
+  async deleteProduct(@Param('id', ParseIntPipe) id: number) {
+    return await this.appService.deleteProduct(id);
+  }
+
+  @Patch('picture/:id')
   @UseInterceptors(FilesInterceptor('picture'))
   async uploadFile(
     @Param('id', ParseIntPipe) id: number,
     @UploadedFiles() files: Express.Multer.File[],
-    @Query('folder') folder?: string
   ) {
     if (!files) {
       throw new BadRequestException(`Not files`);
     };
 
     const newFile = await this.appService.filterFiles(files[0], id);
-    return this.appService.saveFile(newFile, folder, id);
+    return this.appService.saveFile(newFile, id);
   }
 }

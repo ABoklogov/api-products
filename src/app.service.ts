@@ -1,8 +1,9 @@
-import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { CreateDto, MFile } from './dto/create.dto';
 import { DatabaseService } from './database/database.service';
 import * as sharp from 'sharp';
 import { join } from 'path';
+import { promises as fs } from 'fs';
 import { access, mkdir, writeFile } from 'fs/promises';
 
 @Injectable()
@@ -59,7 +60,7 @@ export class AppService {
   };
 
   async getProduct(id: number) {
-    return await this.databaseService.product.findUnique({ where: { id } })
+    return await this.databaseService.product.findUnique({ where: { id } });
   };
 
   async addProduct(dto: CreateDto) {
@@ -68,8 +69,23 @@ export class AppService {
     })
   };
 
-  async saveFile(file: MFile, folder = 'default', id: number) {
-    const uploadFolder = join(__dirname, '..', 'static', folder);
+  async deleteProduct(id: number) {
+    const imagePath = join(__dirname, '..', 'static/images', `${id}.webp`);
+
+    try {
+      await fs.unlink(imagePath);
+    } catch (error) {
+      if (error.code === 'ENOENT') {
+        throw new NotFoundException(`Image with ID ${id} not found`);
+      };
+      throw error;
+    };
+
+    return await this.databaseService.product.delete({ where: { id } });
+  };
+
+  async saveFile(file: MFile, id: number) {
+    const uploadFolder = join(__dirname, '..', 'static/images');
 
     try {
       await access(uploadFolder);
@@ -85,7 +101,7 @@ export class AppService {
 
     return this.databaseService.product.update({
       where: { id },
-      data: { picture: `/static/${folder}/${file.originalname}` },
+      data: { picture: `/static/images/${file.originalname}` },
     });
   };
 
