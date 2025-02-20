@@ -24,8 +24,8 @@ export class AppService {
     } : {};
 
     const whereOther = filterOther?.reduce((acc, filter) => {
-      const [key, value] = filter.split('_'); // Разделяем ключ и значение
-      acc[key] = value === 'true' ? { not: null } : null; // Преобразуем строку в булево значение
+      const [key, value] = filter.split('_');
+      acc[key] = value === 'true' ? { not: null } : null;
       return acc;
     }, {}) || {};
 
