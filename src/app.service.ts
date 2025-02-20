@@ -70,6 +70,21 @@ export class AppService {
   };
 
   async deleteProduct(id: number) {
+    await this.deleteFile(id);
+    return await this.databaseService.product.delete({ where: { id } });
+  };
+
+  async deletePicture(id: number) {
+    await this.deleteFile(id);
+    return await this.databaseService.product.update({ 
+      where: { id },
+      data: {
+        picture: null,
+      },
+    });
+  };
+
+  async deleteFile(id: number) {
     const imagePath = join(__dirname, '..', 'static/images', `${id}.webp`);
 
     try {
@@ -80,8 +95,6 @@ export class AppService {
       };
       throw error;
     };
-
-    return await this.databaseService.product.delete({ where: { id } });
   };
 
   async saveFile(file: MFile, id: number) {

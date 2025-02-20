@@ -78,7 +78,7 @@ export class AppController {
     return await this.appService.deleteProduct(id);
   }
 
-  @Patch('picture/:id')
+  @Patch('picture/update/:id')
   @UseInterceptors(FilesInterceptor('picture'))
   async uploadFile(
     @Param('id', ParseIntPipe) id: number,
@@ -90,5 +90,13 @@ export class AppController {
 
     const newFile = await this.appService.filterFiles(files[0], id);
     return this.appService.saveFile(newFile, id);
+  }
+
+  @Patch('picture/delete/:id')
+  @UseInterceptors(FilesInterceptor('picture'))
+  async deleteFile(
+    @Param('id', ParseIntPipe) id: number,
+  ) {
+    return this.appService.deletePicture(id);
   }
 }
