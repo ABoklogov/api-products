@@ -1,22 +1,23 @@
-import { BadRequestException, Body, Controller, DefaultValuePipe, Delete, Get, HttpCode, Param, ParseIntPipe, Patch, Post, Query, UploadedFiles, UseInterceptors, UsePipes, ValidationPipe } from '@nestjs/common';
+import { 
+  BadRequestException, 
+  Body, 
+  Controller, 
+  DefaultValuePipe, 
+  Delete, 
+  Get, 
+  Param, 
+  ParseIntPipe, 
+  Patch, 
+  Post, 
+  Query, 
+  UploadedFiles, 
+  UseInterceptors, 
+  UsePipes, 
+  ValidationPipe 
+} from '@nestjs/common';
 import { AppService } from './app.service';
-import { CreateDto } from './dto/create.dto';
+import { CreateDto, FilterOptions, SortOptions } from './dto/create.dto';
 import { FilesInterceptor } from '@nestjs/platform-express';
-
-enum SortOptions {
-  ID_ASC = 'id_asc',
-  PRICE_ASC = 'price_asc',
-  PRICE_DESC = 'price_desc',
-  NAME_ASC = 'name_asc',
-  NAME_DESC = 'name_desc',
-};
-
-enum FilterOptions {
-  PRICE = 'price',
-  PICTURE = 'picture',
-  SALE = 'sale',
-  DESCRIPTION = 'description',
-};
 
 @Controller('products')
 export class AppController {

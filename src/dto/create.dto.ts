@@ -27,7 +27,7 @@ export class CreateDto {
   @IsOptional()
   @Min(1)
   sale?: number;
-}
+};
 
 export class MFile {
   buffer: Buffer;
@@ -39,4 +39,19 @@ export class MFile {
     this.mimetype = file.mimetype;
     this.originalname = file.originalname;
   }
-}
+};
+
+export enum SortOptions {
+  ID_ASC = 'id_asc',
+  PRICE_ASC = 'price_asc',
+  PRICE_DESC = 'price_desc',
+  NAME_ASC = 'name_asc',
+  NAME_DESC = 'name_desc',
+};
+
+export enum FilterOptions {
+  PRICE = 'price',
+  PICTURE = 'picture',
+  SALE = 'sale',
+  DESCRIPTION = 'description',
+};
