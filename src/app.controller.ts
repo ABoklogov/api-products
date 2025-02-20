@@ -1,6 +1,7 @@
-import { BadRequestException, Body, Controller, DefaultValuePipe, Get, Param, ParseIntPipe, Post, Query, UsePipes, ValidationPipe } from '@nestjs/common';
+import { BadRequestException, Body, Controller, DefaultValuePipe, Get, HttpCode, Param, ParseIntPipe, Patch, Post, Query, UploadedFiles, UseInterceptors, UsePipes, ValidationPipe } from '@nestjs/common';
 import { AppService } from './app.service';
 import { CreateDto } from './dto/create.dto';
+import { FilesInterceptor } from '@nestjs/platform-express';
 
 enum SortOptions {
   ID_ASC = 'id_asc',
@@ -70,5 +71,21 @@ export class AppController {
   async addProduct(@Body() dto: CreateDto) {
     const res = await this.appService.addProduct(dto);
     return res;
+  }
+
+  @Patch(':id/picture')
+  @HttpCode(200)
+  @UseInterceptors(FilesInterceptor('picture'))
+  async uploadFile(
+    @Param('id', ParseIntPipe) id: number,
+    @UploadedFiles() files: Express.Multer.File[],
+    @Query('folder') folder?: string
+  ) {
+    if (!files) {
+      throw new BadRequestException(`Not files`);
+    };
+
+    const newFile = await this.appService.filterFiles(files[0], id);
+    return this.appService.saveFile(newFile, folder, id);
   }
 }

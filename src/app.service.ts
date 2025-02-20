@@ -1,6 +1,9 @@
-import { Injectable } from '@nestjs/common';
-import { CreateDto } from './dto/create.dto';
+import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
+import { CreateDto, MFile } from './dto/create.dto';
 import { DatabaseService } from './database/database.service';
+import * as sharp from 'sharp';
+import { join } from 'path';
+import { access, mkdir, writeFile } from 'fs/promises';
 
 @Injectable()
 export class AppService {
@@ -63,5 +66,45 @@ export class AppService {
     return await this.databaseService.product.create({
       data: dto
     })
-  }
+  };
+
+  async saveFile(file: MFile, folder = 'default', id: number) {
+    const uploadFolder = join(__dirname, '..', 'static', folder);
+
+    try {
+      await access(uploadFolder);
+    } catch (error) {
+      await mkdir(uploadFolder, {recursive: true});
+    };
+
+    try {
+      await writeFile(join(uploadFolder, file.originalname), file.buffer);
+    } catch (error) {
+      throw new InternalServerErrorException('error writing files');
+    };
+
+    return this.databaseService.product.update({
+      where: { id },
+      data: { picture: `/static/${folder}/${file.originalname}` },
+    });
+  };
+
+  convertToWebP(file: Buffer): Promise<Buffer> {
+    return sharp(file).webp().toBuffer();
+  };
+
+  async filterFiles(file: MFile, id: number) {
+    const mimetype = file.mimetype;
+
+    if (!mimetype.includes('image')) {
+      throw new BadRequestException('file format not supported');
+    };
+
+    const buffer = await this.convertToWebP(file.buffer);
+    return new MFile({
+      buffer,
+      originalname: `${id}.webp`,
+      mimetype,
+    });
+  };
 }
