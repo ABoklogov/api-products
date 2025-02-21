@@ -9,7 +9,7 @@ import { join } from 'path';
   imports: [
     DatabaseModule,
     ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', '..', '/static'),
+      rootPath: join(__dirname, '..', '/static'),
       serveRoot: '/static',
     })
   ],

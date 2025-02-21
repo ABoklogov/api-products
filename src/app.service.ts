@@ -75,7 +75,11 @@ export class AppService {
   };
 
   async deletePicture(id: number) {
-    await this.deleteFile(id);
+    const errorCode = await this.deleteFile(id);
+    if (errorCode === 'ENOENT') {
+      throw new NotFoundException(`Image with ID ${id} not found`);
+    };
+
     return await this.databaseService.product.update({ 
       where: { id },
       data: {
@@ -90,10 +94,7 @@ export class AppService {
     try {
       await fs.unlink(imagePath);
     } catch (error) {
-      if (error.code === 'ENOENT') {
-        throw new NotFoundException(`Image with ID ${id} not found`);
-      };
-      throw error;
+      return error.code;
     };
   };
 
