@@ -5,6 +5,7 @@ import * as sharp from 'sharp';
 import { join } from 'path';
 import { promises as fs } from 'fs';
 import { access, mkdir, writeFile } from 'fs/promises';
+import * as moment from 'moment';
 
 @Injectable()
 export class AppService {
@@ -89,10 +90,12 @@ export class AppService {
   };
 
   async deleteFile(id: number) {
-    const imagePath = join(__dirname, '..', 'static/images', `${id}.webp`);
+    const imagesDir = join(__dirname, '..', 'static', 'images');
+    const files = await fs.readdir(imagesDir);
+    const fileToDelete = files.find(file => file.endsWith(`__${id}.webp`)) || '';
 
     try {
-      await fs.unlink(imagePath);
+      await fs.unlink(join(imagesDir, fileToDelete));
     } catch (error) {
       return error.code;
     };
@@ -131,9 +134,11 @@ export class AppService {
     };
 
     const buffer = await this.convertToWebP(file.buffer);
+    const date = moment().format('DD-MM-YYYY_hh:mm:ss');
+
     return new MFile({
       buffer,
-      originalname: `${id}.webp`,
+      originalname: `${date}__${id}.webp`,
       mimetype,
     });
   };
